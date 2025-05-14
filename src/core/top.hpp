@@ -36,6 +36,8 @@
 #include <functional>
 #include <sstream>
 #include <string>
+#include <climits>
+
 
 namespace spla {
 

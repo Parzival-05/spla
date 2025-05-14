@@ -27,15 +27,14 @@ SOFTWARE.
 """
 
 import ctypes
+import random as rnd
 
 from .bridge import backend, check
-from .type import Type, INT, UINT, FLOAT
-from .object import Object
-from .memview import MemView
-from .scalar import Scalar
 from .descriptor import Descriptor
-from .op import OpUnary, OpBinary, OpSelect
-import random as rnd
+from .memview import MemView
+from .object import Object
+from .scalar import Scalar
+from .type import FLOAT, INT, UINT, Type
 
 
 class Vector(Object):
@@ -70,9 +69,9 @@ class Vector(Object):
     using one of built-in OpenCL or CUDA accelerators.
     """
 
-    __slots__ = ["_dtype", "_shape"]
+    __slots__ = ["_dtype", "_shape", "_zero_V"]
 
-    def __init__(self, shape, dtype=INT, hnd=None, label=None):
+    def __init__(self, shape, dtype=INT, hnd=None, label=None, zero_v=None):
         """
         Creates new vector of specified type and shape.
 
@@ -98,6 +97,11 @@ class Vector(Object):
         :param label: optional: str. default: None.
             Optional label to assign.
         """
+        if not zero_v:
+            zero_v = Scalar(dtype, 0)
+        elif not isinstance(zero_v, Scalar):
+            zero_v = Scalar(dtype, zero_v)
+        self._zero_V = zero_v
 
         super().__init__(None, None)
 
@@ -111,9 +115,13 @@ class Vector(Object):
 
         if not hnd:
             hnd = ctypes.c_void_p(0)
-            check(backend().spla_Vector_make(ctypes.byref(hnd), ctypes.c_uint(shape), dtype._hnd))
-
+            check(
+                backend().spla_Vector_make(
+                    ctypes.byref(hnd), ctypes.c_uint(shape), dtype._hnd
+                )
+            )
         super().__init__(label, hnd)
+        self._set_fill_value(self._zero_V)
 
     @property
     def dtype(self):
@@ -169,6 +177,9 @@ class Vector(Object):
 
         check(backend().spla_Vector_set_format(self.hnd, ctypes.c_int(fmt.value)))
 
+    def _set_fill_value(self, v):
+        check(backend().spla_Vector_set_fill_value(self.hnd, v._hnd))
+
     def set(self, i, v):
         """
         Set value at specified index
@@ -193,7 +204,9 @@ class Vector(Object):
             Value to set.
         """
 
-        check(self._dtype._vector_set(self.hnd, ctypes.c_uint(i), self._dtype._c_type(v)))
+        check(
+            self._dtype._vector_set(self.hnd, ctypes.c_uint(i), self._dtype._c_type(v))
+        )
 
     def get(self, i):
         """
@@ -218,7 +231,9 @@ class Vector(Object):
         """
 
         c_value = self._dtype._c_type(0)
-        check(self._dtype._vector_get(self.hnd, ctypes.c_uint(i), ctypes.byref(c_value)))
+        check(
+            self._dtype._vector_get(self.hnd, ctypes.c_uint(i), ctypes.byref(c_value))
+        )
         return self._dtype.cast_value(c_value)
 
     def build(self, view_I: MemView, view_V: MemView):
@@ -246,8 +261,14 @@ class Vector(Object):
 
         keys_view_hnd = ctypes.c_void_p(0)
         values_view_hnd = ctypes.c_void_p(0)
-        check(backend().spla_Vector_read(self.hnd, ctypes.byref(keys_view_hnd), ctypes.byref(values_view_hnd)))
-        return MemView(hnd=keys_view_hnd, owner=self), MemView(hnd=values_view_hnd, owner=self)
+        check(
+            backend().spla_Vector_read(
+                self.hnd, ctypes.byref(keys_view_hnd), ctypes.byref(values_view_hnd)
+            )
+        )
+        return MemView(hnd=keys_view_hnd, owner=self), MemView(
+            hnd=values_view_hnd, owner=self
+        )
 
     def clear(self):
         """
@@ -275,8 +296,16 @@ class Vector(Object):
         buffer_I = (UINT._c_type * count)()
         buffer_V = (self._dtype._c_type * count)()
 
-        check(backend().spla_MemView_read(I.hnd, ctypes.c_size_t(0), ctypes.sizeof(buffer_I), buffer_I))
-        check(backend().spla_MemView_read(V.hnd, ctypes.c_size_t(0), ctypes.sizeof(buffer_V), buffer_V))
+        check(
+            backend().spla_MemView_read(
+                I.hnd, ctypes.c_size_t(0), ctypes.sizeof(buffer_I), buffer_I
+            )
+        )
+        check(
+            backend().spla_MemView_read(
+                V.hnd, ctypes.c_size_t(0), ctypes.sizeof(buffer_V), buffer_V
+            )
+        )
 
         return list(buffer_I), list(buffer_V)
 
@@ -331,14 +360,16 @@ class Vector(Object):
             value = self.get(row)
             value = value if value != skip_value else "."
             result += format_string.format(row) + "|"
-            result += format_string.format(self.dtype.format_value(value, width, precision)).rstrip()
+            result += format_string.format(
+                self.dtype.format_value(value, width, precision)
+            ).rstrip()
             if row < self.n_rows - 1:
                 result += "\n"
 
         return result
 
     @classmethod
-    def from_lists(cls, I: list, V: list, shape, dtype=INT):
+    def from_lists(cls, I: list, V: list, shape, dtype=INT, zero_v=None):
         """
         Build vector from a list of sorted keys and associated values to store in vector.
         List with keys `keys` must index entries from range [0, shape-1] and all keys must be sorted.
@@ -371,7 +402,7 @@ class Vector(Object):
         assert shape > 0
 
         if not I:
-            return Vector(shape, dtype)
+            return Vector(shape, dtype, zero_v=zero_v)
 
         count = len(I)
 
@@ -381,7 +412,7 @@ class Vector(Object):
         view_I = MemView(buffer=c_I, size=ctypes.sizeof(c_I), mutable=False)
         view_V = MemView(buffer=c_V, size=ctypes.sizeof(c_V), mutable=False)
 
-        v = Vector(shape=shape, dtype=dtype)
+        v = Vector(shape=shape, dtype=dtype, zero_v=zero_v)
         v.build(view_I, view_V)
 
         return v
@@ -422,7 +453,9 @@ class Vector(Object):
         if seed is not None:
             rnd.seed(seed)
 
-        I = sorted(list({rnd.randint(0, shape - 1) for _ in range(int(shape * density))}))
+        I = sorted(
+            list({rnd.randint(0, shape - 1) for _ in range(int(shape * density))})
+        )
         count = len(I)
 
         if dtype is INT:
@@ -527,7 +560,7 @@ class Vector(Object):
         """
 
         if out is None:
-            out = Vector(shape=M.n_cols, dtype=self.dtype)
+            out = Vector(shape=M.n_cols, dtype=self.dtype, zero_v=self._zero_V)
         if init is None:
             init = Scalar(dtype=self.dtype, value=0)
 
@@ -543,10 +576,20 @@ class Vector(Object):
         assert mask.n_rows == M.n_cols
         assert M.n_rows == self.n_rows
 
-        check(backend().spla_Exec_vxm_masked(out.hnd, mask.hnd, self.hnd, M.hnd,
-                                             op_mult.hnd, op_add.hnd, op_select.hnd,
-                                             init.hnd, self._get_desc(desc), self._get_task(None)))
-
+        check(
+            backend().spla_Exec_vxm_masked(
+                out.hnd,
+                mask.hnd,
+                self.hnd,
+                M.hnd,
+                op_mult.hnd,
+                op_add.hnd,
+                op_select.hnd,
+                init.hnd,
+                self._get_desc(desc),
+                self._get_task(None),
+            )
+        )
         return out
 
     def eadd(self, op_add, v, out=None, desc=None):
@@ -588,8 +631,16 @@ class Vector(Object):
         assert out.dtype == out.dtype
         assert op_add
 
-        check(backend().spla_Exec_v_eadd(out.hnd, self.hnd, v.hnd, op_add.hnd,
-                                         self._get_desc(desc), self._get_task(None)))
+        check(
+            backend().spla_Exec_v_eadd(
+                out.hnd,
+                self.hnd,
+                v.hnd,
+                op_add.hnd,
+                self._get_desc(desc),
+                self._get_task(None),
+            )
+        )
 
         return out
 
@@ -632,8 +683,16 @@ class Vector(Object):
         assert out.dtype == out.dtype
         assert op_mult
 
-        check(backend().spla_Exec_v_emult(out.hnd, self.hnd, v.hnd, op_mult.hnd,
-                                          self._get_desc(desc), self._get_task(None)))
+        check(
+            backend().spla_Exec_v_emult(
+                out.hnd,
+                self.hnd,
+                v.hnd,
+                op_mult.hnd,
+                self._get_desc(desc),
+                self._get_task(None),
+            )
+        )
 
         return out
 
@@ -677,8 +736,17 @@ class Vector(Object):
         assert op_assign
         assert op_select
 
-        check(backend().spla_Exec_v_assign_masked(self.hnd, mask.hnd, value.hnd, op_assign.hnd, op_select.hnd,
-                                                  self._get_desc(desc), self._get_task(None)))
+        check(
+            backend().spla_Exec_v_assign_masked(
+                self.hnd,
+                mask.hnd,
+                value.hnd,
+                op_assign.hnd,
+                op_select.hnd,
+                self._get_desc(desc),
+                self._get_task(None),
+            )
+        )
 
         return self
 
@@ -715,8 +783,15 @@ class Vector(Object):
         assert out.n_rows == self.n_rows
         assert out.dtype == self.dtype
 
-        check(backend().spla_Exec_v_map(out.hnd, self.hnd, op_map.hnd,
-                                        self._get_desc(desc), self._get_task(None)))
+        check(
+            backend().spla_Exec_v_map(
+                out.hnd,
+                self.hnd,
+                op_map.hnd,
+                self._get_desc(desc),
+                self._get_task(None),
+            )
+        )
 
         return out
 
@@ -759,13 +834,21 @@ class Vector(Object):
         assert out.dtype == self.dtype
         assert init.dtype == self.dtype
 
-        check(backend().spla_Exec_v_reduce(out.hnd, init.hnd, self.hnd, op_reduce.hnd,
-                                           self._get_desc(desc), self._get_task(None)))
+        check(
+            backend().spla_Exec_v_reduce(
+                out.hnd,
+                init.hnd,
+                self.hnd,
+                op_reduce.hnd,
+                self._get_desc(desc),
+                self._get_task(None),
+            )
+        )
 
         return out
 
     def __str__(self):
-        return self.to_string()
+        return self.to_string(skip_value=self._zero_V.get())
 
     def __iter__(self):
         I, V = self.to_lists()

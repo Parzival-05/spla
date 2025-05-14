@@ -40,16 +40,16 @@ namespace spla {
      * @{
      */
 
-    /**
-     * @class Op
-     * @brief An callable operation to parametrize execution of math computations
-     */
+     /**
+      * @class Op
+      * @brief An callable operation to parametrize execution of math computations
+      */
     class Op : public Object {
     public:
-        SPLA_API ~Op() override                        = default;
-        SPLA_API virtual ref_ptr<Type> get_type_res()  = 0;
-        SPLA_API virtual std::string   get_name()      = 0;
-        SPLA_API virtual std::string   get_key()       = 0;
+        SPLA_API ~Op() override = default;
+        SPLA_API virtual ref_ptr<Type> get_type_res() = 0;
+        SPLA_API virtual std::string   get_name() = 0;
+        SPLA_API virtual std::string   get_key() = 0;
         SPLA_API virtual std::string   get_source_cl() = 0;
     };
 
@@ -59,7 +59,7 @@ namespace spla {
      */
     class OpUnary : public Op {
     public:
-        SPLA_API ~OpUnary() override                      = default;
+        SPLA_API ~OpUnary() override = default;
         SPLA_API virtual ref_ptr<Type>   get_type_arg_0() = 0;
         SPLA_API static ref_ptr<OpUnary> make_int(std::string name, std::string code, std::function<T_INT(T_INT)> function);
         SPLA_API static ref_ptr<OpUnary> make_uint(std::string name, std::string code, std::function<T_UINT(T_UINT)> function);
@@ -72,7 +72,7 @@ namespace spla {
      */
     class OpBinary : public Op {
     public:
-        SPLA_API ~OpBinary() override                      = default;
+        SPLA_API ~OpBinary() override = default;
         SPLA_API virtual ref_ptr<Type>    get_type_arg_0() = 0;
         SPLA_API virtual ref_ptr<Type>    get_type_arg_1() = 0;
         SPLA_API static ref_ptr<OpBinary> make_int(std::string name, std::string code, std::function<T_INT(T_INT, T_INT)> function);
@@ -86,7 +86,7 @@ namespace spla {
      */
     class OpSelect : public Op {
     public:
-        SPLA_API ~OpSelect() override                      = default;
+        SPLA_API ~OpSelect() override = default;
         SPLA_API virtual ref_ptr<Type>    get_type_arg_0() = 0;
         SPLA_API static ref_ptr<OpSelect> make_int(std::string name, std::string code, std::function<bool(T_INT)> function);
         SPLA_API static ref_ptr<OpSelect> make_uint(std::string name, std::string code, std::function<bool(T_UINT)> function);
@@ -182,6 +182,14 @@ namespace spla {
     SPLA_API extern ref_ptr<OpBinary> BXOR_INT;
     SPLA_API extern ref_ptr<OpBinary> BXOR_UINT;
 
+    SPLA_API extern ref_ptr<OpBinary> FIRST_NON_MAX_INT;
+    SPLA_API extern ref_ptr<OpBinary> MIN_NON_MAX_INT;
+    SPLA_API extern ref_ptr<OpBinary> CONST_MAX_INT;
+    SPLA_API extern ref_ptr<OpBinary> SECOND_MAX_INT;
+    SPLA_API extern ref_ptr<OpBinary> MIN_NON_ZERO_INT;
+    SPLA_API extern ref_ptr<OpBinary> S1ST_IF_SND_MAX_INT;
+    SPLA_API extern ref_ptr<OpBinary> FST_MINUS_ONE_INT;
+
     //////////////////////////////// Select ////////////////////////////////
 
     SPLA_API extern ref_ptr<OpSelect> EQZERO_INT;
@@ -208,6 +216,10 @@ namespace spla {
     SPLA_API extern ref_ptr<OpSelect> NEVER_INT;
     SPLA_API extern ref_ptr<OpSelect> NEVER_UINT;
     SPLA_API extern ref_ptr<OpSelect> NEVER_FLOAT;
+
+    SPLA_API extern ref_ptr<OpSelect> EQUALS_MINF_FLOAT;
+    SPLA_API extern ref_ptr<OpSelect> EQUALS_MAX_INT;
+    SPLA_API extern ref_ptr<OpSelect> NEQUALS_MAX_INT;
 
     /**
      * @}

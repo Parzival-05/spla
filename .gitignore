@@ -12,3 +12,6 @@ registry.txt
 
 # Python cache files
 /**/__pycache__
+
+**/build/**
+pyspla.egg-info

@@ -29,16 +29,9 @@ SOFTWARE.
 import ctypes
 
 from .bridge import backend
-from .op import OpUnary, OpBinary, OpSelect
+from .op import OpBinary, OpSelect, OpUnary
 
-__all__ = [
-    "Type",
-    "BOOL",
-    "INT",
-    "UINT",
-    "FLOAT",
-    "BUILT_IN"
-]
+__all__ = ["Type", "BOOL", "INT", "UINT", "FLOAT", "BUILT_IN"]
 
 
 class Type:
@@ -109,7 +102,7 @@ class Type:
 
     _c_type = None
     _c_type_p = None
-    _code = ''
+    _code = ""
     _scalar_get = None
     _scalar_set = None
     _array_get = None
@@ -156,6 +149,13 @@ class Type:
     BOR: OpBinary
     BAND: OpBinary
     BXOR: OpBinary
+    FIRST_NON_MAX_INT: OpBinary
+    MIN_NON_MAX_INT: OpBinary
+    CONST_MAX_INT: OpBinary
+    SECOND_MAX_INT: OpBinary
+    MIN_NON_ZERO_INT: OpBinary
+    S1ST_IF_SND_MAX_INT: OpBinary
+    FST_MINUS_ONE_INT: OpBinary
 
     EQZERO: OpSelect
     NQZERO: OpSelect
@@ -165,6 +165,9 @@ class Type:
     LEZERO: OpSelect
     ALWAYS: OpSelect
     NEVER: OpSelect
+    EQUALS_MINF_FLOAT: OpSelect
+    EQUALS_MAX_INT: OpSelect
+    NEQUALS_MAX_INT: OpSelect
 
     @classmethod
     def get_code(cls):
@@ -214,28 +217,32 @@ class Type:
         def load_op(name):
             f = f"spla_OpUnary_{name}_{type_name}"
             func = getattr(b, f) if hasattr(b, f) else None
-            return OpUnary(hnd=func(), name=name, dtype_res=cls, dtype_arg0=cls) if func else None
+            return (
+                OpUnary(hnd=func(), name=name, dtype_res=cls, dtype_arg0=cls)
+                if func
+                else None
+            )
 
-        cls.IDENTITY = load_op('IDENTITY')
-        cls.AINV = load_op('AINV')
-        cls.MINV = load_op('MINV')
-        cls.LNOT = load_op('LNOT')
-        cls.UONE = load_op('UONE')
-        cls.ABS = load_op('ABS')
-        cls.BNOT = load_op('BNOT')
-        cls.SQRT = load_op('SQRT')
-        cls.LOG = load_op('LOG')
-        cls.EXP = load_op('EXP')
-        cls.SIN = load_op('SIN')
-        cls.COS = load_op('COS')
-        cls.TAN = load_op('TAN')
-        cls.ASIN = load_op('ASIN')
-        cls.ACOS = load_op('ACOS')
-        cls.ATAN = load_op('ATAN')
-        cls.CEIL = load_op('CEIL')
-        cls.FLOOR = load_op('FLOOR')
-        cls.ROUND = load_op('ROUND')
-        cls.TRUNC = load_op('TRUNC')
+        cls.IDENTITY = load_op("IDENTITY")
+        cls.AINV = load_op("AINV")
+        cls.MINV = load_op("MINV")
+        cls.LNOT = load_op("LNOT")
+        cls.UONE = load_op("UONE")
+        cls.ABS = load_op("ABS")
+        cls.BNOT = load_op("BNOT")
+        cls.SQRT = load_op("SQRT")
+        cls.LOG = load_op("LOG")
+        cls.EXP = load_op("EXP")
+        cls.SIN = load_op("SIN")
+        cls.COS = load_op("COS")
+        cls.TAN = load_op("TAN")
+        cls.ASIN = load_op("ASIN")
+        cls.ACOS = load_op("ACOS")
+        cls.ATAN = load_op("ATAN")
+        cls.CEIL = load_op("CEIL")
+        cls.FLOOR = load_op("FLOOR")
+        cls.ROUND = load_op("ROUND")
+        cls.TRUNC = load_op("TRUNC")
 
     @classmethod
     def _setup_op_binary(cls):
@@ -245,23 +252,36 @@ class Type:
         def load_op(name):
             f = f"spla_OpBinary_{name}_{type_name}"
             func = getattr(b, f) if hasattr(b, f) else None
-            return OpBinary(hnd=func(), name=name, dtype_res=cls, dtype_arg0=cls, dtype_arg1=cls) if func else None
+            return (
+                OpBinary(
+                    hnd=func(), name=name, dtype_res=cls, dtype_arg0=cls, dtype_arg1=cls
+                )
+                if func
+                else None
+            )
 
-        cls.PLUS = load_op('PLUS')
-        cls.MINUS = load_op('MINUS')
-        cls.MULT = load_op('MULT')
-        cls.DIV = load_op('DIV')
-        cls.MINUS_POW2 = load_op('MINUS_POW2')
-        cls.FIRST = load_op('FIRST')
-        cls.SECOND = load_op('SECOND')
-        cls.BONE = load_op('BONE')
-        cls.MIN = load_op('MIN')
-        cls.MAX = load_op('MAX')
-        cls.LOR = load_op('LOR')
-        cls.LAND = load_op('LAND')
-        cls.BOR = load_op('BOR')
-        cls.BAND = load_op('BAND')
-        cls.BXOR = load_op('BXOR')
+        cls.PLUS = load_op("PLUS")
+        cls.MINUS = load_op("MINUS")
+        cls.MULT = load_op("MULT")
+        cls.DIV = load_op("DIV")
+        cls.MINUS_POW2 = load_op("MINUS_POW2")
+        cls.FIRST = load_op("FIRST")
+        cls.SECOND = load_op("SECOND")
+        cls.BONE = load_op("BONE")
+        cls.MIN = load_op("MIN")
+        cls.MAX = load_op("MAX")
+        cls.LOR = load_op("LOR")
+        cls.LAND = load_op("LAND")
+        cls.BOR = load_op("BOR")
+        cls.BAND = load_op("BAND")
+        cls.BXOR = load_op("BXOR")
+        cls.FIRST_NON_MAX_INT = load_op("FIRST_NON_MAX")
+        cls.MIN_NON_MAX_INT = load_op("MIN_NON_MAX")
+        cls.CONST_MAX_INT = load_op("CONST_MAX")
+        cls.SECOND_MAX_INT = load_op("SECOND_MAX")
+        cls.MIN_NON_ZERO_INT = load_op("MIN_NON_ZERO")
+        cls.S1ST_IF_SND_MAX_INT = load_op("S1ST_IF_SND_MAX")
+        cls.FST_MINUS_ONE_INT = load_op("FST_MINUS_ONE")
 
     @classmethod
     def _setup_op_select(cls):
@@ -273,14 +293,17 @@ class Type:
             func = getattr(b, f) if hasattr(b, f) else None
             return OpSelect(hnd=func(), name=name, dtype_arg0=cls) if func else None
 
-        cls.EQZERO = load_op('EQZERO')
-        cls.NQZERO = load_op('NQZERO')
-        cls.GTZERO = load_op('GTZERO')
-        cls.GEZERO = load_op('GEZERO')
-        cls.LTZERO = load_op('LTZERO')
-        cls.LEZERO = load_op('LEZERO')
-        cls.ALWAYS = load_op('ALWAYS')
-        cls.NEVER = load_op('NEVER')
+        cls.EQZERO = load_op("EQZERO")
+        cls.NQZERO = load_op("NQZERO")
+        cls.GTZERO = load_op("GTZERO")
+        cls.GEZERO = load_op("GEZERO")
+        cls.LTZERO = load_op("LTZERO")
+        cls.LEZERO = load_op("LEZERO")
+        cls.ALWAYS = load_op("ALWAYS")
+        cls.NEVER = load_op("NEVER")
+        cls.EQUALS_MINF_FLOAT = load_op("EQUALS_MINF")
+        cls.EQUALS_MAX_INT = load_op("EQUALS_MAX")
+        cls.NEQUALS_MAX_INT = load_op("NEQUALS_MAX")
 
     @classmethod
     def _setup(cls):
@@ -311,7 +334,7 @@ class BOOL(Type):
 
     _c_type = ctypes.c_bool
     _c_type_p = ctypes.POINTER(ctypes.c_bool)
-    _code = 'B'
+    _code = "B"
 
     @classmethod
     def cast_value(cls, value):
@@ -323,7 +346,7 @@ class INT(Type):
 
     _c_type = ctypes.c_int
     _c_type_p = ctypes.POINTER(ctypes.c_int)
-    _code = 'I'
+    _code = "I"
 
     @classmethod
     def cast_value(cls, value):
@@ -335,7 +358,7 @@ class UINT(Type):
 
     _c_type = ctypes.c_uint
     _c_type_p = ctypes.POINTER(ctypes.c_uint)
-    _code = 'U'
+    _code = "U"
 
     @classmethod
     def cast_value(cls, value):
@@ -347,7 +370,7 @@ class FLOAT(Type):
 
     _c_type = ctypes.c_float
     _c_type_p = ctypes.POINTER(ctypes.c_float)
-    _code = 'F'
+    _code = "F"
 
     @classmethod
     def cast_value(cls, value):

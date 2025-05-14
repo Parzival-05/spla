@@ -26,6 +26,7 @@
 /**********************************************************************************/
 
 #include <core/top.hpp>
+#include <iostream>
 
 #include "spla/op.hpp"
 
@@ -121,6 +122,14 @@ namespace spla {
     ref_ptr<OpBinary> BXOR_INT;
     ref_ptr<OpBinary> BXOR_UINT;
 
+    ref_ptr<OpBinary> FIRST_NON_MAX_INT;
+    ref_ptr<OpBinary> MIN_NON_MAX_INT;
+    ref_ptr<OpBinary> CONST_MAX_INT;
+    ref_ptr<OpBinary> SECOND_MAX_INT;
+    ref_ptr<OpBinary> MIN_NON_ZERO_INT;
+    ref_ptr<OpBinary> S1ST_IF_SND_MAX_INT;
+    ref_ptr<OpBinary> FST_MINUS_ONE_INT;
+
     //////////////////////////////////////////////////////////////////////////////
 
     ref_ptr<OpSelect> EQZERO_INT;
@@ -147,6 +156,10 @@ namespace spla {
     ref_ptr<OpSelect> NEVER_INT;
     ref_ptr<OpSelect> NEVER_UINT;
     ref_ptr<OpSelect> NEVER_FLOAT;
+
+    ref_ptr<OpSelect> EQUALS_MINF_FLOAT;
+    ref_ptr<OpSelect> EQUALS_MAX_INT;
+    ref_ptr<OpSelect> NEQUALS_MAX_INT;
 
     template<typename T>
     inline T min(T a, T b) { return std::min(a, b); }
@@ -240,6 +253,43 @@ namespace spla {
         DECL_OP_BIN_S(BXOR_INT, BXOR, T_INT, { return a ^ b; });
         DECL_OP_BIN_S(BXOR_UINT, BXOR, T_UINT, { return a ^ b; });
 
+        DECL_OP_BIN_S(FIRST_NON_MAX_INT, FIRST_NON_MAX_INT, T_INT, {
+            if (a == INT_MAX || b == INT_MAX) {
+                return INT_MAX;
+            }
+                return a;
+            });
+        DECL_OP_BIN_S(MIN_NON_MAX_INT, MIN_NON_MAX_INT, T_INT, {
+            if (a == INT_MAX || b == INT_MAX) { return INT_MAX; }
+            return min(a, b);
+            });
+        DECL_OP_BIN_S(CONST_MAX_INT, CONST_MAX_INT, T_INT, { return INT_MAX; });
+        DECL_OP_BIN_S(SECOND_MAX_INT, SECOND_MAX_INT, T_INT, {
+            if (a == INT_MAX) {
+                return b;
+            }
+            return a;
+            });
+        DECL_OP_BIN_S(MIN_NON_ZERO_INT, MIN_NON_ZERO_INT, T_INT, {
+            if (a == 0) {
+                return b;
+            }
+            return min(a, b);
+            });
+
+        DECL_OP_BIN_S(S1ST_IF_SND_MAX_INT, S1ST_IF_SND_MAX_INT, T_INT, {
+            if (b == INT_MAX) {
+                return a;
+            }
+            return INT_MAX;
+            });
+        DECL_OP_BIN_S(FST_MINUS_ONE_INT, FST_MINUS_ONE_INT, T_INT, {
+            if (a == INT_MAX && b == INT_MAX) {
+                return INT_MAX;
+            }
+            return a - 1;
+            });
+
         DECL_OP_SELECT(EQZERO_INT, EQZERO, T_INT, { return a == 0; });
         DECL_OP_SELECT(EQZERO_UINT, EQZERO, T_UINT, { return a == 0; });
         DECL_OP_SELECT(EQZERO_FLOAT, EQZERO, T_FLOAT, { return a == 0; });
@@ -264,80 +314,84 @@ namespace spla {
         DECL_OP_SELECT(NEVER_INT, NEVER, T_INT, { return 0; });
         DECL_OP_SELECT(NEVER_UINT, NEVER, T_UINT, { return 0; });
         DECL_OP_SELECT(NEVER_FLOAT, NEVER, T_FLOAT, { return 0; });
+
+        DECL_OP_SELECT(EQUALS_MINF_FLOAT, EQUALS_MINF_FLOAT, T_FLOAT, { return a == -INFINITY; }); // MINF == -inf
+        DECL_OP_SELECT(EQUALS_MAX_INT, EQUALS_MAX_INT, T_INT, { return a == INT_MAX; });
+        DECL_OP_SELECT(NEQUALS_MAX_INT, NEQUALS_MAX_INT, T_INT, { return a != INT_MAX; });
     }
 
     ref_ptr<OpUnary> OpUnary::make_int(std::string name, std::string code, std::function<T_INT(T_INT)> function) {
-        auto op      = make_ref<TOpUnary<T_INT, T_INT>>();
-        op->name     = std::move(name);
+        auto op = make_ref<TOpUnary<T_INT, T_INT>>();
+        op->name = std::move(name);
         op->function = std::move(function);
-        op->source   = std::move(code);
-        op->key      = op->name + "_" + op->get_type_arg_0()->get_code() + op->get_type_res()->get_code();
+        op->source = std::move(code);
+        op->key = op->name + "_" + op->get_type_arg_0()->get_code() + op->get_type_res()->get_code();
         return op.as<OpUnary>();
     }
     ref_ptr<OpUnary> OpUnary::make_uint(std::string name, std::string code, std::function<T_UINT(T_UINT)> function) {
-        auto op      = make_ref<TOpUnary<T_UINT, T_UINT>>();
-        op->name     = std::move(name);
+        auto op = make_ref<TOpUnary<T_UINT, T_UINT>>();
+        op->name = std::move(name);
         op->function = std::move(function);
-        op->source   = std::move(code);
-        op->key      = op->name + "_" + op->get_type_arg_0()->get_code() + op->get_type_res()->get_code();
+        op->source = std::move(code);
+        op->key = op->name + "_" + op->get_type_arg_0()->get_code() + op->get_type_res()->get_code();
         return op.as<OpUnary>();
     }
     ref_ptr<OpUnary> OpUnary::make_float(std::string name, std::string code, std::function<T_FLOAT(T_FLOAT)> function) {
-        auto op      = make_ref<TOpUnary<T_FLOAT, T_FLOAT>>();
-        op->name     = std::move(name);
+        auto op = make_ref<TOpUnary<T_FLOAT, T_FLOAT>>();
+        op->name = std::move(name);
         op->function = std::move(function);
-        op->source   = std::move(code);
-        op->key      = op->name + "_" + op->get_type_arg_0()->get_code() + op->get_type_res()->get_code();
+        op->source = std::move(code);
+        op->key = op->name + "_" + op->get_type_arg_0()->get_code() + op->get_type_res()->get_code();
         return op.as<OpUnary>();
     }
 
     ref_ptr<OpBinary> OpBinary::make_int(std::string name, std::string code, std::function<T_INT(T_INT, T_INT)> function) {
-        auto op      = make_ref<TOpBinary<T_INT, T_INT, T_INT>>();
-        op->name     = std::move(name);
+        auto op = make_ref<TOpBinary<T_INT, T_INT, T_INT>>();
+        op->name = std::move(name);
         op->function = std::move(function);
-        op->source   = std::move(code);
-        op->key      = op->name + "_" + op->get_type_arg_0()->get_code() + op->get_type_arg_1()->get_code() + op->get_type_res()->get_code();
+        op->source = std::move(code);
+        op->key = op->name + "_" + op->get_type_arg_0()->get_code() + op->get_type_arg_1()->get_code() + op->get_type_res()->get_code();
         return op.as<OpBinary>();
     }
     ref_ptr<OpBinary> OpBinary::make_uint(std::string name, std::string code, std::function<T_UINT(T_UINT, T_UINT)> function) {
-        auto op      = make_ref<TOpBinary<T_UINT, T_UINT, T_UINT>>();
-        op->name     = std::move(name);
+        auto op = make_ref<TOpBinary<T_UINT, T_UINT, T_UINT>>();
+        op->name = std::move(name);
         op->function = std::move(function);
-        op->source   = std::move(code);
-        op->key      = op->name + "_" + op->get_type_arg_0()->get_code() + op->get_type_arg_1()->get_code() + op->get_type_res()->get_code();
+        op->source = std::move(code);
+        op->key = op->name + "_" + op->get_type_arg_0()->get_code() + op->get_type_arg_1()->get_code() + op->get_type_res()->get_code();
         return op.as<OpBinary>();
     }
     ref_ptr<OpBinary> OpBinary::make_float(std::string name, std::string code, std::function<T_FLOAT(T_FLOAT, T_FLOAT)> function) {
-        auto op      = make_ref<TOpBinary<T_FLOAT, T_FLOAT, T_FLOAT>>();
-        op->name     = std::move(name);
+        auto op = make_ref<TOpBinary<T_FLOAT, T_FLOAT, T_FLOAT>>();
+        op->name = std::move(name);
         op->function = std::move(function);
-        op->source   = std::move(code);
-        op->key      = op->name + "_" + op->get_type_arg_0()->get_code() + op->get_type_arg_1()->get_code() + op->get_type_res()->get_code();
+        op->source = std::move(code);
+        op->key = op->name + "_" + op->get_type_arg_0()->get_code() + op->get_type_arg_1()->get_code() + op->get_type_res()->get_code();
         return op.as<OpBinary>();
     }
 
     ref_ptr<OpSelect> OpSelect::make_int(std::string name, std::string code, std::function<bool(T_INT)> function) {
-        auto op      = make_ref<TOpSelect<T_INT>>();
-        op->name     = std::move(name);
+        auto op = make_ref<TOpSelect<T_INT>>();
+        op->name = std::move(name);
         op->function = std::move(function);
-        op->source   = std::move(code);
-        op->key      = op->name + "_" + op->get_type_arg_0()->get_code();
+        op->source = std::move(code);
+        op->key = op->name + "_" + op->get_type_arg_0()->get_code();
         return op.as<OpSelect>();
     }
     ref_ptr<OpSelect> OpSelect::make_uint(std::string name, std::string code, std::function<bool(T_UINT)> function) {
-        auto op      = make_ref<TOpSelect<T_UINT>>();
-        op->name     = std::move(name);
+        auto op = make_ref<TOpSelect<T_UINT>>();
+        op->name = std::move(name);
         op->function = std::move(function);
-        op->source   = std::move(code);
-        op->key      = op->name + "_" + op->get_type_arg_0()->get_code();
+        op->source = std::move(code);
+        op->key = op->name + "_" + op->get_type_arg_0()->get_code();
         return op.as<OpSelect>();
     }
     ref_ptr<OpSelect> OpSelect::make_float(std::string name, std::string code, std::function<bool(T_FLOAT)> function) {
-        auto op      = make_ref<TOpSelect<T_FLOAT>>();
-        op->name     = std::move(name);
+        auto op = make_ref<TOpSelect<T_FLOAT>>();
+        op->name = std::move(name);
         op->function = std::move(function);
-        op->source   = std::move(code);
-        op->key      = op->name + "_" + op->get_type_arg_0()->get_code();
+        op->source = std::move(code);
+        op->key = op->name + "_" + op->get_type_arg_0()->get_code();
         return op.as<OpSelect>();
     }
 

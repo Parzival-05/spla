@@ -104,6 +104,14 @@ spla_OpBinary spla_OpBinary_BAND_UINT() { return as_ptr<spla_OpBinary_t>(spla::B
 spla_OpBinary spla_OpBinary_BXOR_INT() { return as_ptr<spla_OpBinary_t>(spla::BXOR_INT.ref_and_get()); }
 spla_OpBinary spla_OpBinary_BXOR_UINT() { return as_ptr<spla_OpBinary_t>(spla::BXOR_UINT.ref_and_get()); }
 
+spla_OpBinary spla_OpBinary_FIRST_NON_MAX_INT() { return as_ptr<spla_OpBinary_t>(spla::FIRST_NON_MAX_INT.ref_and_get()); }
+spla_OpBinary spla_OpBinary_MIN_NON_MAX_INT() { return as_ptr<spla_OpBinary_t>(spla::MIN_NON_MAX_INT.ref_and_get()); }
+spla_OpBinary spla_OpBinary_CONST_MAX_INT() { return as_ptr<spla_OpBinary_t>(spla::CONST_MAX_INT.ref_and_get()); }
+spla_OpBinary spla_OpBinary_SECOND_MAX_INT() { return as_ptr<spla_OpBinary_t>(spla::SECOND_MAX_INT.ref_and_get()); }
+spla_OpBinary spla_OpBinary_MIN_NON_ZERO_INT() { return as_ptr<spla_OpBinary_t>(spla::MIN_NON_ZERO_INT.ref_and_get()); }
+spla_OpBinary spla_OpBinary_S1ST_IF_SND_MAX_INT() { return as_ptr<spla_OpBinary_t>(spla::S1ST_IF_SND_MAX_INT.ref_and_get()); }
+spla_OpBinary spla_OpBinary_FST_MINUS_ONE_INT() { return as_ptr<spla_OpBinary_t>(spla::FST_MINUS_ONE_INT.ref_and_get()); }
+
 spla_OpSelect spla_OpSelect_EQZERO_INT() { return as_ptr<spla_OpSelect_t>(spla::EQZERO_INT.ref_and_get()); }
 spla_OpSelect spla_OpSelect_EQZERO_UINT() { return as_ptr<spla_OpSelect_t>(spla::EQZERO_UINT.ref_and_get()); }
 spla_OpSelect spla_OpSelect_EQZERO_FLOAT() { return as_ptr<spla_OpSelect_t>(spla::EQZERO_FLOAT.ref_and_get()); }
@@ -128,3 +136,6 @@ spla_OpSelect spla_OpSelect_ALWAYS_FLOAT() { return as_ptr<spla_OpSelect_t>(spla
 spla_OpSelect spla_OpSelect_NEVER_INT() { return as_ptr<spla_OpSelect_t>(spla::NEVER_INT.ref_and_get()); }
 spla_OpSelect spla_OpSelect_NEVER_UINT() { return as_ptr<spla_OpSelect_t>(spla::NEVER_UINT.ref_and_get()); }
 spla_OpSelect spla_OpSelect_NEVER_FLOAT() { return as_ptr<spla_OpSelect_t>(spla::NEVER_FLOAT.ref_and_get()); }
+spla_OpSelect spla_OpSelect_EQUALS_MINF_FLOAT() { return as_ptr<spla_OpSelect_t>(spla::EQUALS_MINF_FLOAT.ref_and_get()); }
+spla_OpSelect spla_OpSelect_EQUALS_MAX_INT() { return as_ptr<spla_OpSelect_t>(spla::EQUALS_MAX_INT.ref_and_get()); }
+spla_OpSelect spla_OpSelect_NEQUALS_MAX_INT() { return as_ptr<spla_OpSelect_t>(spla::NEQUALS_MAX_INT.ref_and_get()); }
