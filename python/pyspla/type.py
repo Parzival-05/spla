@@ -156,6 +156,8 @@ class Type:
     MIN_NON_ZERO_INT: OpBinary
     S1ST_IF_SND_MAX_INT: OpBinary
     FST_MINUS_ONE_INT: OpBinary
+    SELECT_MIN_WEIGHT_UINT: OpBinary
+    CONSTRUCT_PAIR_UINT: OpBinary
 
     EQZERO: OpSelect
     NQZERO: OpSelect
@@ -166,8 +168,8 @@ class Type:
     ALWAYS: OpSelect
     NEVER: OpSelect
     EQUALS_MINF_FLOAT: OpSelect
-    EQUALS_MAX_INT: OpSelect
-    NEQUALS_MAX_INT: OpSelect
+    EQUALS_MAX: OpSelect
+    NEQUALS_MAX: OpSelect
 
     @classmethod
     def get_code(cls):
@@ -282,6 +284,8 @@ class Type:
         cls.MIN_NON_ZERO_INT = load_op("MIN_NON_ZERO")
         cls.S1ST_IF_SND_MAX_INT = load_op("S1ST_IF_SND_MAX")
         cls.FST_MINUS_ONE_INT = load_op("FST_MINUS_ONE")
+        cls.SELECT_MIN_WEIGHT_UINT = load_op("SELECT_MIN_WEIGHT")
+        cls.CONSTRUCT_PAIR_UINT: OpBinary = load_op("CONSTRUCT_PAIR")
 
     @classmethod
     def _setup_op_select(cls):
@@ -302,8 +306,8 @@ class Type:
         cls.ALWAYS = load_op("ALWAYS")
         cls.NEVER = load_op("NEVER")
         cls.EQUALS_MINF_FLOAT = load_op("EQUALS_MINF")
-        cls.EQUALS_MAX_INT = load_op("EQUALS_MAX")
-        cls.NEQUALS_MAX_INT = load_op("NEQUALS_MAX")
+        cls.EQUALS_MAX = load_op("EQUALS_MAX")
+        cls.NEQUALS_MAX = load_op("NEQUALS_MAX")
 
     @classmethod
     def _setup(cls):

@@ -244,6 +244,8 @@ extern "C" {
     SPLA_API spla_OpBinary spla_OpBinary_MIN_NON_ZERO_INT();
     SPLA_API spla_OpBinary spla_OpBinary_S1ST_IF_SND_MAX_INT();
     SPLA_API spla_OpBinary spla_OpBinary_FST_MINUS_ONE_INT();
+    SPLA_API spla_OpBinary spla_OpBinary_SELECT_MIN_WEIGHT_UINT();
+    SPLA_API spla_OpBinary spla_OpBinary_CONSTRUCT_PAIR_UINT();
 
     //////////////////////////////////////////////////////////////////////////////////////
 
@@ -275,7 +277,9 @@ extern "C" {
     SPLA_API spla_OpSelect spla_OpSelect_NEVER_FLOAT();
     SPLA_API spla_OpSelect spla_OpSelect_EQUALS_MINF_FLOAT();
     SPLA_API spla_OpSelect spla_OpSelect_EQUALS_MAX_INT();
+    SPLA_API spla_OpSelect spla_OpSelect_EQUALS_MAX_UINT();
     SPLA_API spla_OpSelect spla_OpSelect_NEQUALS_MAX_INT();
+    SPLA_API spla_OpSelect spla_OpSelect_NEQUALS_MAX_UINT();
 
     //////////////////////////////////////////////////////////////////////////////////////
 

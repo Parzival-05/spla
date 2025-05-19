@@ -129,6 +129,8 @@ namespace spla {
     ref_ptr<OpBinary> MIN_NON_ZERO_INT;
     ref_ptr<OpBinary> S1ST_IF_SND_MAX_INT;
     ref_ptr<OpBinary> FST_MINUS_ONE_INT;
+    ref_ptr<OpBinary> SELECT_MIN_WEIGHT_UINT;
+    ref_ptr<OpBinary> CONSTRUCT_PAIR_UINT;
 
     //////////////////////////////////////////////////////////////////////////////
 
@@ -159,7 +161,9 @@ namespace spla {
 
     ref_ptr<OpSelect> EQUALS_MINF_FLOAT;
     ref_ptr<OpSelect> EQUALS_MAX_INT;
+    ref_ptr<OpSelect> EQUALS_MAX_UINT;
     ref_ptr<OpSelect> NEQUALS_MAX_INT;
+    ref_ptr<OpSelect> NEQUALS_MAX_UINT;
 
     template<typename T>
     inline T min(T a, T b) { return std::min(a, b); }
@@ -283,11 +287,32 @@ namespace spla {
             }
             return INT_MAX;
             });
+
         DECL_OP_BIN_S(FST_MINUS_ONE_INT, FST_MINUS_ONE_INT, T_INT, {
             if (a == INT_MAX && b == INT_MAX) {
                 return INT_MAX;
             }
             return a - 1;
+            });
+
+        DECL_OP_BIN_S(SELECT_MIN_WEIGHT_UINT, SELECT_MIN_WEIGHT_UINT, T_UINT, {
+            // 11 bits for weight == 2048 values
+            uint weight_a = a >> 21;
+            uint weight_b = b >> 21;
+            uint value_a = a & 0x1FFFFF;
+            uint value_b = b & 0x1FFFFF;
+            if (weight_a <= weight_b) {
+                return (weight_a << 21) + value_a;
+            }
+            return (weight_b << 21) + value_b;
+            });
+
+        DECL_OP_BIN_S(CONSTRUCT_PAIR_UINT, CONSTRUCT_PAIR_UINT, T_UINT, {
+            uint weight_a = a >> 21;
+            uint weight_b = b >> 21;
+            uint value_a = a & 0x1FFFFF;
+            uint value_b = b & 0x1FFFFF;
+            return (weight_b << 21) + value_a;
             });
 
         DECL_OP_SELECT(EQZERO_INT, EQZERO, T_INT, { return a == 0; });
@@ -317,7 +342,9 @@ namespace spla {
 
         DECL_OP_SELECT(EQUALS_MINF_FLOAT, EQUALS_MINF_FLOAT, T_FLOAT, { return a == -INFINITY; }); // MINF == -inf
         DECL_OP_SELECT(EQUALS_MAX_INT, EQUALS_MAX_INT, T_INT, { return a == INT_MAX; });
-        DECL_OP_SELECT(NEQUALS_MAX_INT, NEQUALS_MAX_INT, T_INT, { return a != INT_MAX; });
+        DECL_OP_SELECT(EQUALS_MAX_UINT, EQUALS_MAX, T_UINT, { return a == UINT_MAX; });
+        DECL_OP_SELECT(NEQUALS_MAX_INT, NEQUALS_MAX, T_INT, { return a != INT_MAX; });
+        DECL_OP_SELECT(NEQUALS_MAX_UINT, NEQUALS_MAX, T_UINT, { return a != UINT_MAX; });
     }
 
     ref_ptr<OpUnary> OpUnary::make_int(std::string name, std::string code, std::function<T_INT(T_INT)> function) {

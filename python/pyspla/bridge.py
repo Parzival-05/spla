@@ -334,6 +334,8 @@ def load_library(lib_path):
     _spla.spla_OpBinary_MIN_NON_ZERO_INT.restype = _object_t
     _spla.spla_OpBinary_S1ST_IF_SND_MAX_INT.restype = _object_t
     _spla.spla_OpBinary_FST_MINUS_ONE_INT.restype = _object_t
+    _spla.spla_OpBinary_SELECT_MIN_WEIGHT_UINT.restype = _object_t
+    _spla.spla_OpBinary_CONSTRUCT_PAIR_UINT.restype = _object_t
 
     _spla.spla_OpBinary_PLUS_INT.argtypes = []
     _spla.spla_OpBinary_PLUS_UINT.argtypes = []
@@ -385,6 +387,8 @@ def load_library(lib_path):
     _spla.spla_OpBinary_MIN_NON_ZERO_INT.argtypes = []
     _spla.spla_OpBinary_S1ST_IF_SND_MAX_INT.argtypes = []
     _spla.spla_OpBinary_FST_MINUS_ONE_INT.argtypes = []
+    _spla.spla_OpBinary_SELECT_MIN_WEIGHT_UINT.argtypes = []
+    _spla.spla_OpBinary_CONSTRUCT_PAIR_UINT.argtypes = []
 
     _spla.spla_OpSelect_EQZERO_INT.restype = _object_t
     _spla.spla_OpSelect_EQZERO_UINT.restype = _object_t
@@ -413,7 +417,9 @@ def load_library(lib_path):
 
     _spla.spla_OpSelect_EQUALS_MINF_FLOAT.restype = _object_t
     _spla.spla_OpSelect_EQUALS_MAX_INT.restype = _object_t
+    _spla.spla_OpSelect_EQUALS_MAX_UINT.restype = _object_t
     _spla.spla_OpSelect_NEQUALS_MAX_INT.restype = _object_t
+    _spla.spla_OpSelect_NEQUALS_MAX_UINT.restype = _object_t
 
     _spla.spla_OpSelect_EQZERO_INT.argtypes = []
     _spla.spla_OpSelect_EQZERO_UINT.argtypes = []
@@ -442,7 +448,9 @@ def load_library(lib_path):
 
     _spla.spla_OpSelect_EQUALS_MINF_FLOAT.argtypes = []
     _spla.spla_OpSelect_EQUALS_MAX_INT.argtypes = []
+    _spla.spla_OpSelect_EQUALS_MAX_UINT.argtypes = []
     _spla.spla_OpSelect_NEQUALS_MAX_INT.argtypes = []
+    _spla.spla_OpSelect_NEQUALS_MAX_UINT.argtypes = []
 
     _spla.spla_RefCnt_ref.restype = _status_t
     _spla.spla_RefCnt_unref.restype = _status_t

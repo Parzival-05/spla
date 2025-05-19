@@ -189,6 +189,8 @@ namespace spla {
     SPLA_API extern ref_ptr<OpBinary> MIN_NON_ZERO_INT;
     SPLA_API extern ref_ptr<OpBinary> S1ST_IF_SND_MAX_INT;
     SPLA_API extern ref_ptr<OpBinary> FST_MINUS_ONE_INT;
+    SPLA_API extern ref_ptr<OpBinary> SELECT_MIN_WEIGHT_UINT;
+    SPLA_API extern ref_ptr<OpBinary> CONSTRUCT_PAIR_UINT;
 
     //////////////////////////////// Select ////////////////////////////////
 
@@ -219,7 +221,9 @@ namespace spla {
 
     SPLA_API extern ref_ptr<OpSelect> EQUALS_MINF_FLOAT;
     SPLA_API extern ref_ptr<OpSelect> EQUALS_MAX_INT;
+    SPLA_API extern ref_ptr<OpSelect> EQUALS_MAX_UINT;
     SPLA_API extern ref_ptr<OpSelect> NEQUALS_MAX_INT;
+    SPLA_API extern ref_ptr<OpSelect> NEQUALS_MAX_UINT;
 
     /**
      * @}

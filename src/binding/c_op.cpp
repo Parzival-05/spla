@@ -111,6 +111,8 @@ spla_OpBinary spla_OpBinary_SECOND_MAX_INT() { return as_ptr<spla_OpBinary_t>(sp
 spla_OpBinary spla_OpBinary_MIN_NON_ZERO_INT() { return as_ptr<spla_OpBinary_t>(spla::MIN_NON_ZERO_INT.ref_and_get()); }
 spla_OpBinary spla_OpBinary_S1ST_IF_SND_MAX_INT() { return as_ptr<spla_OpBinary_t>(spla::S1ST_IF_SND_MAX_INT.ref_and_get()); }
 spla_OpBinary spla_OpBinary_FST_MINUS_ONE_INT() { return as_ptr<spla_OpBinary_t>(spla::FST_MINUS_ONE_INT.ref_and_get()); }
+spla_OpBinary spla_OpBinary_SELECT_MIN_WEIGHT_UINT() { return as_ptr<spla_OpBinary_t>(spla::SELECT_MIN_WEIGHT_UINT.ref_and_get()); }
+spla_OpBinary spla_OpBinary_CONSTRUCT_PAIR_UINT() { return as_ptr<spla_OpBinary_t>(spla::CONSTRUCT_PAIR_UINT.ref_and_get()); }
 
 spla_OpSelect spla_OpSelect_EQZERO_INT() { return as_ptr<spla_OpSelect_t>(spla::EQZERO_INT.ref_and_get()); }
 spla_OpSelect spla_OpSelect_EQZERO_UINT() { return as_ptr<spla_OpSelect_t>(spla::EQZERO_UINT.ref_and_get()); }
@@ -138,4 +140,6 @@ spla_OpSelect spla_OpSelect_NEVER_UINT() { return as_ptr<spla_OpSelect_t>(spla::
 spla_OpSelect spla_OpSelect_NEVER_FLOAT() { return as_ptr<spla_OpSelect_t>(spla::NEVER_FLOAT.ref_and_get()); }
 spla_OpSelect spla_OpSelect_EQUALS_MINF_FLOAT() { return as_ptr<spla_OpSelect_t>(spla::EQUALS_MINF_FLOAT.ref_and_get()); }
 spla_OpSelect spla_OpSelect_EQUALS_MAX_INT() { return as_ptr<spla_OpSelect_t>(spla::EQUALS_MAX_INT.ref_and_get()); }
+spla_OpSelect spla_OpSelect_EQUALS_MAX_UINT() { return as_ptr<spla_OpSelect_t>(spla::EQUALS_MAX_UINT.ref_and_get()); }
 spla_OpSelect spla_OpSelect_NEQUALS_MAX_INT() { return as_ptr<spla_OpSelect_t>(spla::NEQUALS_MAX_INT.ref_and_get()); }
+spla_OpSelect spla_OpSelect_NEQUALS_MAX_UINT() { return as_ptr<spla_OpSelect_t>(spla::NEQUALS_MAX_UINT.ref_and_get()); }
