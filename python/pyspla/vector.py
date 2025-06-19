@@ -29,6 +29,8 @@ SOFTWARE.
 import ctypes
 import random as rnd
 
+from pyspla import FormatMatrix
+
 from .bridge import backend, check
 from .descriptor import Descriptor
 from .memview import MemView
@@ -69,9 +71,17 @@ class Vector(Object):
     using one of built-in OpenCL or CUDA accelerators.
     """
 
-    __slots__ = ["_dtype", "_shape", "_zero_V"]
+    __slots__ = ["_dtype", "_shape", "_zero_V", "format"]
 
-    def __init__(self, shape, dtype=INT, hnd=None, label=None, zero_v=None):
+    def __init__(
+        self,
+        shape,
+        format=FormatMatrix.CPU_COO,
+        dtype=INT,
+        hnd=None,
+        label=None,
+        zero_v=None,
+    ):
         """
         Creates new vector of specified type and shape.
 
@@ -112,6 +122,7 @@ class Vector(Object):
 
         self._dtype = dtype
         self._shape = (shape, 1)
+        self.format = format
 
         if not hnd:
             hnd = ctypes.c_void_p(0)
@@ -121,6 +132,8 @@ class Vector(Object):
                 )
             )
         super().__init__(label, hnd)
+
+        self.set_format(format)
         self._set_fill_value(self._zero_V)
 
     @property

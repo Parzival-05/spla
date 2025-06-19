@@ -29,6 +29,8 @@ SOFTWARE.
 import ctypes
 import random as rnd
 
+from pyspla import FormatMatrix
+
 from .bridge import backend, check
 from .descriptor import Descriptor
 from .memview import MemView
@@ -69,9 +71,17 @@ class Matrix(Object):
     using one of built-in OpenCL or CUDA accelerators.
     """
 
-    __slots__ = ["_dtype", "_shape", "_zero_V"]
+    __slots__ = ["_dtype", "_shape", "_zero_V", "format"]
 
-    def __init__(self, shape, dtype=INT, hnd=None, label=None, zero_v=None):
+    def __init__(
+        self,
+        shape,
+        format=FormatMatrix.CPU_COO,
+        dtype=INT,
+        hnd=None,
+        label=None,
+        zero_v=None,
+    ):
         """
         Creates new matrix of specified type and shape.
 
@@ -113,6 +123,7 @@ class Matrix(Object):
 
         self._dtype = dtype
         self._shape = shape
+        self.format = format
 
         if not hnd:
             hnd = ctypes.c_void_p(0)
@@ -125,6 +136,8 @@ class Matrix(Object):
                 )
             )
         super().__init__(label, hnd)
+
+        self.set_format(format)
         self._set_fill_value(self._zero_V)
 
     @property
@@ -191,8 +204,7 @@ class Matrix(Object):
         :param fmt: FormatMatrix.
             One of built-in storage formats to set.
         """
-
-        check(backend().spla_Matrix_set_format(self.hnd, ctypes.c_int(fmt.value)))
+        check(backend().spla_Matrix_set_format(self.hnd, ctypes.c_int32(fmt.value)))
 
     def _set_fill_value(self, v):
         check(backend().spla_Matrix_set_fill_value(self.hnd, v._hnd))
@@ -427,7 +439,16 @@ class Matrix(Object):
         return result
 
     @classmethod
-    def from_lists(cls, I: list, J: list, V: list, shape, dtype=INT, zero_v=None):
+    def from_lists(
+        cls,
+        I: list,
+        J: list,
+        V: list,
+        shape,
+        format: FormatMatrix = FormatMatrix.CPU_COO,
+        dtype=INT,
+        zero_v=None,
+    ):
         """
         Build matrix from a list of sorted keys and associated values to store in matrix.
         List with keys `I` and `J` must index entries from range [0, shape-1] and all keys must be sorted.
@@ -466,7 +487,7 @@ class Matrix(Object):
         assert shape[0] > 0 and shape[1] > 0
 
         if not I:
-            return Matrix(shape, dtype, zero_v=zero_v)
+            return Matrix(shape, format=format, dtype=dtype, zero_v=zero_v)
         count = len(I)
 
         c_I = (UINT._c_type * count)(*I)
@@ -477,9 +498,8 @@ class Matrix(Object):
         view_J = MemView(buffer=c_J, size=ctypes.sizeof(c_J), mutable=False)
         view_V = MemView(buffer=c_V, size=ctypes.sizeof(c_V), mutable=False)
 
-        M = Matrix(shape=shape, dtype=dtype, zero_v=zero_v)
+        M = Matrix(format=format, shape=shape, dtype=dtype, zero_v=zero_v)
         M.build(view_I, view_J, view_V)
-
         return M
 
     @classmethod
@@ -1148,7 +1168,7 @@ class Matrix(Object):
         """
 
         if out is None:
-            out = Matrix(shape=self.shape, dtype=self.dtype)
+            out = Matrix(format=self.format, shape=self.shape, dtype=self.dtype)
 
         assert M
         assert out
@@ -1215,7 +1235,7 @@ class Matrix(Object):
         """
 
         if out is None:
-            out = Matrix(shape=self.shape, dtype=self.dtype)
+            out = Matrix(format=self.format, shape=self.shape, dtype=self.dtype)
 
         assert M
         assert out
